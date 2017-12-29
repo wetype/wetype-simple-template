@@ -17,9 +17,14 @@ const compileTpl = require('./build/gulp-compile-tpl')
 const copyModules = require('./build/gulp-copy-modules')
 const cache = require('gulp-cached')
 const fs = require('fs')
+const imagemin = require('gulp-imagemin')
+const modifyWxml = require('./build/gulp-modify-wxml')
+const modifyWxss = require('./build/gulp-modify-wxss')
+const plumber = require('gulp-plumber')
 
 gulp.task('ts', () => {
     return tsProject.src()
+        .pipe(plumber())
         .pipe(cache('ts'))
         .pipe(tsProject())
         .js
@@ -32,22 +37,26 @@ gulp.task('ts', () => {
 
 gulp.task('pug', () => {
     gulp.src('src/**/*.pug')
+        .pipe(plumber())
         .pipe(pug())
         .pipe(rename({
             extname: '.wxml'
         }))
         .pipe(flatten())
+        .pipe(modifyWxml())
         .pipe(compileTpl())
         .pipe(gulp.dest('dist'))
 })
 
 gulp.task('less', cb => {
     return gulp.src('src/**/*.less')
+        .pipe(plumber())
         .pipe(less())
         .pipe(flatten())
         .pipe(rename({
             extname: '.wxss'
         }))
+        .pipe(modifyWxss())
         .pipe(gulp.dest('dist'))
 })
 
@@ -69,35 +78,27 @@ gulp.task('copy', () => {
 
 })
 
-gulp.task('page', () => {
-    let { argv } = process
-    let pageName = argv.slice(-1)
-    let pugTpl = ``
-    let tsTpl = `
-    import { PageDecor, global, PageConstr, wx } from 'wetype-simple'
+gulp.task('img', () => {
+    gulp.src('src/img/*')
+        .pipe(imagemin())
+        .pipe(gulp.dest('dist/img'))
+})
 
-    @PageDecor({
-        config: {
+gulp.task('uglify', () => {
+    gulp.src('dist/**/*.js')
+        .pipe(uglify())
+        .pipe(gulp.dest('dist'))
+})
 
-        }
+gulp.task('w', () => {
+    const tsWatcher = gulp.watch('src/**/*.ts', ['ts'])
+    const pugWatcher = gulp.watch('src/**/*.pug', ['pug'])
+    const lessWatcher = gulp.watch('src/**/*.less', ['less'])
+    const imgWatcher = gulp.watch('src/img/*', ['img'])
+    
+    tsWatcher.on('change', e => {
+        console.log('File ' + e.path + ' was ' + e.type + ', running tasks...')
     })
-    class ${pageName} extends PageConstr {
-
-    }
-    `
-    let lessTpl = ``
-    fs.mkdirSync(`src/pages/${pageName}`)
-    fs.writeFileSync(`src/pages/${pageName}/${pageName}.ts`, tsTpl, `utf-8`)
-    fs.writeFileSync(`src/pages/${pageName}/${pageName}.pug`, pugTpl, `utf-8`)
-    fs.writeFileSync(`src/pages/${pageName}/${pageName}.less`, lessTpl, `utf-8`)
 })
 
-gulp.task('default', ['ts', 'pug', 'less', 'copy'])
-
-const tsWatcher = gulp.watch('src/**/*.ts', ['ts'])
-const pugWatcher = gulp.watch('src/**/*.pug', ['pug'])
-const lessWatcher = gulp.watch('src/**/*.less', ['less'])
-
-tsWatcher.on('change', e => {
-    console.log('File ' + e.path + ' was ' + e.type + ', running tasks...')
-})
+gulp.task('default', ['ts', 'pug', 'less', 'copy', 'img', 'w'])

@@ -6,7 +6,8 @@
   "scripts": {
     "rm": "rm -rf ./dist/node_modules",
     "start": "rm -rf dist && gulp",
-    "p": "node ./build/newPage.js"
+    "p": "node ./build/newPage.js page",
+    "c": "node ./build/newPage.js component"
   },
   "devDependencies": {
     "@types/gulp": "^4.0.5",
@@ -22,13 +23,17 @@
     "gulp-clean": "^0.3.2",
     "gulp-flatten": "^0.3.1",
     "gulp-flatten-requires": "^1.0.0",
+    "gulp-imagemin": "^4.0.0",
     "gulp-less": "^3.3.2",
+    "gulp-plumber": "^1.1.0",
     "gulp-pug": "^3.3.0",
     "gulp-rename": "^1.2.2",
     "gulp-rollup": "^2.15.0",
     "gulp-typescript": "^3.2.3",
     "gulp-uglify": "^3.0.0",
+    "html-entities": "^1.2.1",
     "less": "^2.7.3",
+    "mime-types": "^2.1.17",
     "pug": "^2.0.0-rc.4",
     "rollup": "^0.51.5",
     "rollup-plugin-multi-entry": "^2.0.2",
@@ -39,6 +44,7 @@
     "typescript": "^2.5.3"
   },
   "dependencies": {
+    "jquery-param": "^0.2.0",
     "tslib": "^1.8.0",
     "wetype-simple": "0.0.2"
   }

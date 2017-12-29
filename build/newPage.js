@@ -1,21 +1,49 @@
 const fs = require('fs')
 
-let pageName = process.argv.slice(-1)
-let pugTpl = ``
-let tsTpl = `
-import { PageDecor, global, PageConstr, wx } from 'wetype-simple'
+let [type, name] = process.argv.slice(-2)
+console.log(type)
 
-@PageDecor({
+let nameCamel = name.replace(/(\w)/, (m, $) => $.toUpperCase())
+let pugTpl = `
+include ../../pug/weui-mixins
+    
+`
+let lessTpl = ``
+let pageTsTpl = `
+import { Page, wx, wt, types } from 'wetype-simple'
+
+@Page.decor({
     config: {
-
+        navigationBarTitleText: ''
     }
 })
-class ${pageName} extends PageConstr {
+class ${nameCamel} extends Page {
+
+    onLoad(options: types.OnloadOptions) {
+
+    }
 
 }
 `
-let lessTpl = ``
-fs.mkdirSync(`src/pages/${pageName}`)
-fs.writeFileSync(`src/pages/${pageName}/${pageName}.ts`, tsTpl, `utf-8`)
-fs.writeFileSync(`src/pages/${pageName}/${pageName}.pug`, pugTpl, `utf-8`)
-fs.writeFileSync(`src/pages/${pageName}/${pageName}.less`, lessTpl, `utf-8`)
+let componentTsTpl = `
+import { Component, wx, wt, types } from 'wetype-simple'
+
+@Component.decor({
+    config: {}
+})
+class ${nameCamel} extends Component {
+
+
+
+}
+
+`
+
+let tsTpl = type === 'page' ? pageTsTpl : componentTsTpl
+
+let fileName = type === 'page' ? name : name + '.com'
+
+fs.mkdirSync(`src/${type}s/${name}`)
+fs.writeFileSync(`src/${type}s/${name}/${fileName}.ts`, tsTpl, `utf-8`)
+fs.writeFileSync(`src/${type}s/${name}/${fileName}.pug`, pugTpl, `utf-8`)
+fs.writeFileSync(`src/${type}s/${name}/${fileName}.less`, lessTpl, `utf-8`)

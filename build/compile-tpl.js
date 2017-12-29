@@ -3,19 +3,21 @@
  * 
  */
 const _ = require('lodash')
+const Entities = require('html-entities').XmlEntities
+const entities = new Entities
 module.exports = class CompilerTpl {
 
     constructor() {
-        // let tplUrl = path.relative(src, templateUrl)
         this.templateUrl = ''
         this.prefix = ''
         this.matchTag = /([\w\-]+)\:\s?([\s\w\+\-\*\/\&\|_\.]+)\,?/g
     }
 
     render(tplStr, prefix = '') {
-        let reg = /\<([\w\s\'\"\-\@\#\:\(\)\.\,\=\&\|\+\/\*\{\}]+)\>/g
-        let reg2 = /([\w\:\@\#]+)=\"([\w\s\,\.\(\)\=\&\|\+\/\*\{\}\:]+)\"/g
-        let reg3 = /([\w\:\@\#]+)=\"([\w\s\,\.\(\)\=\&\|\+\/\*\{\}\:]+)\"/
+        let reg = /<([\w\W\S\s]+?)\/?>/g
+        // 记得匹配中文和中文标点
+        let reg2 = /([\w\d-\:@#]+?)="([\w\s\,\.\(\)-\=\&\|\+\/\*\{\}\[\]\:\!'#^\u4e00-\u9fa5\u3002|\uff1f|\uff01|\uff0c|\u3001|\uff1b|\uff1a|\u201c|\u201d|\u2018|\u2019|\uff08|\uff09|\u300a|\u300b|\u3008|\u3009|\u3010|\u3011|\u300e|\u300f|\u300c|\u300d|\ufe43|\ufe44|\u3014|\u3015|\u2026|\u2014|\uff5e|\ufe4f|\uffe5]+)\"/g
+        let reg3 = /([\w\d-\:@#]+?)="([\w\s\,\.\(\)-\=\&\|\+\/\*\{\}\[\]\:\!'#^\u4e00-\u9fa5\u3002|\uff1f|\uff01|\uff0c|\u3001|\uff1b|\uff1a|\u201c|\u201d|\u2018|\u2019|\uff08|\uff09|\u300a|\u300b|\u3008|\u3009|\u3010|\u3011|\u300e|\u300f|\u300c|\u300d|\ufe43|\ufe44|\u3014|\u3015|\u2026|\u2014|\uff5e|\ufe4f|\uffe5]+)\"/
 
         return tplStr.replace(reg, (match, $) => {
             let matched = $.match(reg2)
@@ -62,7 +64,7 @@ module.exports = class CompilerTpl {
                 }
 
                 if (_show && !_hide) {
-                    pairs['hidden'] = `{{!${_show}}}`
+                    pairs['hidden'] = `{{!(${_show})}}`
                     delete pairs[':show']
                 }
                 else if (_show && _hide) {
@@ -86,8 +88,8 @@ module.exports = class CompilerTpl {
                     pairs[key.slice(1)] = `{{${pairs[key]}}}`
                     delete pairs[key]
                 })
-
-                let res = _.map(pairs, (v, k) => `${k}="${v}"`).join(' ')
+                // console.log(pairs)
+                let res = _.map(pairs, (v, k) => `${k}="${entities.decode(v)}"`).join(' ')
                 let selfClose = isSelfCloseTag ? ' /' : ''
                 return `<${tagName} ${res}${selfClose}>`
             }
@@ -108,9 +110,9 @@ module.exports = class CompilerTpl {
     handleClass(str) {
         // 先去掉左右的大括号
         str = str.replace(/\{|\}/g, '')
-        let reg = /([\w\-]+)\:\s?([\s\w\+\-\*\/\&\|_\.\!]+)\,?/g
+        let reg = /([\w\-'"_]+)\:\s?([\s\w\+\-\*\/\&\|_\.\!\=]+)\,?/g
         return str.replace(reg, (match, className, expression) =>
-            `{{${expression} ? '${className}' : ''}} `
+            `{{${expression} ? '${className.replace(/'/g, '')}' : ''}} `
         )
     }
 
