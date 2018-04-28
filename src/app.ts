@@ -1,4 +1,4 @@
-import { App, wt } from 'wetype-simple'
+import { App, wt } from 'wetype'
 
 @App.decor({
     config: {
@@ -6,7 +6,8 @@ import { App, wt } from 'wetype-simple'
         window: {
             backgroundTextStyle: 'light',
             navigationBarBackgroundColor: '#3ba686',
-            navigationBarTitleText: 'Project Wetype'
+            navigationBarTitleText: 'Project Wetype',
+            navigationStyle: 'default'
         }
     }
 })

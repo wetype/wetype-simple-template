@@ -19,6 +19,6 @@
     },
     "dependencies": {
         "tslib": "^1.9.0",
-        "wetype-simple": "0.0.2"
+        "wetype": "0.0.2"
     }
 }
