@@ -1,15 +1,15 @@
-import { ComponentDecor } from 'wetype-simple'
+import { Component } from 'wetype-simple'
 
-@ComponentDecor({
+@Component.decor({
     config: {
-
+        
     },
     properties: {
 
     },
     behaviors: []
 })
-export class List {
+export class List extends Component {
 
 
 

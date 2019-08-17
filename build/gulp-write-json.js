@@ -8,17 +8,23 @@ module.exports = function() {
     return through.obj((file, enc, cb) => {
         let { path, contents } = file
         let content = String(contents)
-        let matched = content.match(/[App|Page|Component]Decor\(\{([\s\S\w\W]+?)\}\)/i)
-        let isComponent = /ComponentDecor/.test(content)
-        let isPage = /PageDecor/.test(content)
-        if (matched) {
-            eval('var json = {' + matched[1] + '}')
+        let matched = content.match(/[App|Page|Component]\.decor\(\{([\s\S\w\W]+?)\}\)/i)
+        let isComponent = /Component\.decor/.test(content)
+        let isPage = /Page\.decor/.test(content)
+        let isApp = /App\.decor/.test(content)
+        let hasConfig = isApp || isComponent || isPage
+        if (hasConfig && matched) {
+            // 去掉behaviors
+            let m = rmBehaviorArr(matched[1])
+            eval('var json = {' + m + '}')
             let config = json.config || {}
             // 若是组件，则自动添加组件配置
             if (isComponent) {
-                config.component = true
+                config = {
+                    component: true
+                }
             }
-            if (isPage) {
+            else if (isPage) {
                 Object.keys(config.usingComponents || {}).forEach(name => {
                     let v = config.usingComponents[name]
                     config.usingComponents[name] = `./${v}.com`
@@ -34,4 +40,13 @@ module.exports = function() {
         }
         cb(null, file)
     })
+}
+
+function rmBehaviorArr(str) {
+    return str.replace(/behaviors:\s?\[.+?\]/, '')
+    .replace(/mixins:\s?\[.+?\]/, '')
+}
+
+function getConfig(str) {
+    str.match(/config:\s?\{\}/)
 }

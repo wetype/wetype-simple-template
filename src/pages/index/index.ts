@@ -1,7 +1,6 @@
-import { PageDecor, global, PageConstr } from 'wetype-simple'
-import { testFunc } from '../../libs/util'
+import { Page, wx, wt, types } from 'wetype-simple'
 
-@PageDecor({
+@Page.decor({
     config: {
         disableScroll: true,
         usingComponents: {
@@ -9,21 +8,19 @@ import { testFunc } from '../../libs/util'
         }
     }
 })
-class Index extends PageConstr{
+class Index extends Page {
 
-    abc = false
+    @Page.input('inputAbc')
+    abc = ''
 
-    ddd: any = [1,2,3, 4,5]
+    list = []
     
-    onLoad() {
-        console.log(testFunc())
+    async onLoad() {
+
     }
 
-    click() {
-        // this.setData()
-        this.setData({
-            'ddd': this.ddd.concat(['d'])
-        })
+    async click() {
+
     }
 
 }
